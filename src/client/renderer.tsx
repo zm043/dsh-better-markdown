@@ -27,10 +27,20 @@ function FallbackThinkIcon({ size = 14 }: ThinkIconProps) {
 }
 
 const primitiveIcons = primitives as unknown as Record<string, unknown>
+
+function maybeIcon(name: string): unknown {
+  try {
+    return primitiveIcons[name]
+  } catch {
+    // Some ESM namespace proxies throw on missing exports instead of returning undefined.
+    return undefined
+  }
+}
+
 const ThinkIcon = (
-  primitiveIcons.IconThinkOutline14
-  ?? primitiveIcons.IconThinkOutlineRegular
-  ?? primitiveIcons.IconThinkOutlineMedium
+  maybeIcon('IconThinkOutline14')
+  ?? maybeIcon('IconThinkOutlineRegular')
+  ?? maybeIcon('IconThinkOutlineMedium')
   ?? FallbackThinkIcon
 ) as ComponentType<ThinkIconProps>
 
