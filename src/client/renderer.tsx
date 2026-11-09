@@ -1,9 +1,10 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import MarkdownRender, { MarkdownCodeBlockNode } from 'markstream-react'
 import type { NodeComponentProps } from 'markstream-react'
 import type { CodeBlockNode, ImageNode, InlineCodeNode, LinkNode } from 'stream-markdown-parser'
-import { DisclosureRow, IconThinkOutline14, JsonBlock } from '@deepseek-ai/dsh-client-ui-primitives'
+import { DisclosureRow, JsonBlock } from '@deepseek-ai/dsh-client-ui-primitives'
+import * as primitives from '@deepseek-ai/dsh-client-ui-primitives'
 import type { MarkdownFileMentions } from '@deepseek-ai/dsh-client-ui-primitives'
 import { ImageGallery } from '@deepseek-ai/dsh-client-ui-attachment'
 import type { ImageLoader } from '@deepseek-ai/dsh-client-ui-attachment'
@@ -14,6 +15,24 @@ import type {} from '@deepseek-ai/dsh-client-locale/client'
 import { SHIKI_LANGUAGES } from './shiki.ts'
 
 const CUSTOM_COMPONENT_SCOPE = 'dsh-better-markdown'
+
+/**
+ * DSH 0.2.x renamed IconThinkOutline14 to IconThinkOutlineRegular/Medium.
+ * Resolve at runtime so the plugin keeps working across primitives versions.
+ */
+type ThinkIconProps = { size?: number }
+
+function FallbackThinkIcon({ size = 14 }: ThinkIconProps) {
+  return <span aria-hidden="true" style={{ display: 'inline-block', width: size, height: size }} />
+}
+
+const primitiveIcons = primitives as unknown as Record<string, unknown>
+const ThinkIcon = (
+  primitiveIcons.IconThinkOutline14
+  ?? primitiveIcons.IconThinkOutlineRegular
+  ?? primitiveIcons.IconThinkOutlineMedium
+  ?? FallbackThinkIcon
+) as ComponentType<ThinkIconProps>
 
 function isFileMentions(value: unknown): value is MarkdownFileMentions {
   return typeof value === 'object' && value !== null && 'resolve' in value
@@ -204,7 +223,7 @@ function ReasoningRow({ text, running, t }: {
         leadingClassName="dsh-better-markdown__reasoning-leading"
         titleClassName="dsh-better-markdown__reasoning-title"
         chevronClassName="dsh-better-markdown__reasoning-chevron"
-        icon={<IconThinkOutline14 size={14} />}
+        icon={<ThinkIcon size={14} />}
         title="Think"
         open={expanded}
         expandable
